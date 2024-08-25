@@ -33,6 +33,10 @@ We highly recommend to work with a  `venv`  to avoid issues.
 ```
 pip install -r requirements.txt
 ```
+For MAC OS, You have to install or upgrade python-tk package:
+```
+brew install python-tk@3.10
+```
 ##### DONE!!! If you dont have any GPU, You should be able to run roop using `python run.py` command. Keep in mind that while running the program for first time, it will download some models which can take time depending on your network connection.
 
 ### *Proceed if you want to use GPU Acceleration
@@ -148,16 +152,19 @@ Additional command line arguments are given below. To learn out what they do, ch
 ```
 options:
   -h, --help                                               show this help message and exit
-  -s SOURCE_PATH, --source SOURCE_PATH                     select an source image
-  -t TARGET_PATH, --target TARGET_PATH                     select an target image or video
+  -s SOURCE_PATH, --source SOURCE_PATH                     select a source image
+  -t TARGET_PATH, --target TARGET_PATH                     select a target image or video
   -o OUTPUT_PATH, --output OUTPUT_PATH                     select output file or directory
   --frame-processor FRAME_PROCESSOR [FRAME_PROCESSOR ...]  frame processors (choices: face_swapper, face_enhancer, ...)
   --keep-fps                                               keep original fps
   --keep-audio                                             keep original audio
   --keep-frames                                            keep temporary frames
   --many-faces                                             process every face
+  --nsfw-filter                                            filter the NSFW image or video
   --video-encoder {libx264,libx265,libvpx-vp9}             adjust output video encoder
   --video-quality [0-51]                                   adjust output video quality
+  --live-mirror                                            the live camera display as you see it in the front-facing camera frame
+  --live-resizable                                         the live camera frame is resizable
   --max-memory MAX_MEMORY                                  maximum amount of RAM in GB
   --execution-provider {cpu} [{cpu} ...]                   available execution provider (choices: cpu, ...)
   --execution-threads EXECUTION_THREADS                    number of execution threads
@@ -169,11 +176,21 @@ Looking for a CLI mode? Using the -s/--source argument will make the run program
 ## Want the Next Update Now?
 If you want the latest and greatest build, or want to see some new great features, go to our [experimental branch](https://github.com/hacksider/Deep-Live-Cam/tree/experimental) and experience what the contributors have given.
 
+## TODO
+- [ ] Support multiple faces feature
+- [ ] Develop a version for web app/service
+- [ ] UI/UX enhancements for desktop app
+- [ ] Speed up model loading
+- [ ] Speed up real-time face swapping
+
+*Note: This is an open-source project, and we’re working on it in our free time. Therefore, features, replies, bug fixes, etc., might be delayed. We hope you understand. Thanks.*
+
 ## Credits
 
 - [ffmpeg](https://ffmpeg.org/): for making video related operations easy
 - [deepinsight](https://github.com/deepinsight): for their [insightface](https://github.com/deepinsight/insightface) project which provided a well-made library and models.
 - [havok2-htwo](https://github.com/havok2-htwo) : for sharing the code for webcam
 - [GosuDRM](https://github.com/GosuDRM/nsfw-roop) : for uncensoring roop
+- [vic4key](https://github.com/vic4key) : For supporting/contributing on this project
 - and [all developers](https://github.com/hacksider/Deep-Live-Cam/graphs/contributors) behind libraries used in this project.
 - Foot Note: [This is originally roop-cam, see the full history of the code here.](https://github.com/hacksider/roop-cam) Please be informed that the base author of the code is [s0md3v](https://github.com/s0md3v/roop)
