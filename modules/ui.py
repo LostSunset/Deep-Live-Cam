@@ -66,6 +66,9 @@ def create_root(start: Callable[[], None], destroy: Callable[[], None]) -> ctk.C
     select_face_button = ctk.CTkButton(root, text='Select a face', cursor='hand2', command=lambda: select_source_path())
     select_face_button.place(relx=0.1, rely=0.4, relwidth=0.3, relheight=0.1)
 
+    swap_faces_button = ctk.CTkButton(root, text='↔', cursor='hand2', command=lambda: swap_faces_paths())
+    swap_faces_button.place(relx=0.45, rely=0.4, relwidth=0.1, relheight=0.1)
+
     select_target_button = ctk.CTkButton(root, text='Select a target', cursor='hand2', command=lambda: select_target_path())
     select_target_button.place(relx=0.6, rely=0.4, relwidth=0.3, relheight=0.1)
 
@@ -89,6 +92,11 @@ def create_root(start: Callable[[], None], destroy: Callable[[], None]) -> ctk.C
     many_faces_value = ctk.BooleanVar(value=modules.globals.many_faces)
     many_faces_switch = ctk.CTkSwitch(root, text='Many faces', variable=many_faces_value, cursor='hand2', command=lambda: setattr(modules.globals, 'many_faces', many_faces_value.get()))
     many_faces_switch.place(relx=0.6, rely=0.65)
+
+    # Add color correction toggle button
+    color_correction_value = ctk.BooleanVar(value=modules.globals.color_correction)
+    color_correction_switch = ctk.CTkSwitch(root, text='Fix Blueish Cam\n(force cv2 to use RGB instead of BGR)', variable=color_correction_value, cursor='hand2', command=lambda: setattr(modules.globals, 'color_correction', color_correction_value.get()))
+    color_correction_switch.place(relx=0.6, rely=0.70)
 
 #    nsfw_value = ctk.BooleanVar(value=modules.globals.nsfw_filter)
 #    nsfw_switch = ctk.CTkSwitch(root, text='NSFW filter', variable=nsfw_value, cursor='hand2', command=lambda: setattr(modules.globals, 'nsfw_filter', nsfw_value.get()))
@@ -157,6 +165,30 @@ def select_source_path() -> None:
     else:
         modules.globals.source_path = None
         source_label.configure(image=None)
+
+
+def swap_faces_paths() -> None:
+    global RECENT_DIRECTORY_SOURCE, RECENT_DIRECTORY_TARGET
+
+    source_path = modules.globals.source_path
+    target_path = modules.globals.target_path
+
+    if not is_image(source_path) or not is_image(target_path):
+        return
+
+    modules.globals.source_path = target_path
+    modules.globals.target_path = source_path
+
+    RECENT_DIRECTORY_SOURCE = os.path.dirname(modules.globals.source_path)
+    RECENT_DIRECTORY_TARGET = os.path.dirname(modules.globals.target_path)
+
+    PREVIEW.withdraw()
+
+    source_image = render_image_preview(modules.globals.source_path, (200, 200))
+    source_label.configure(image=source_image)
+
+    target_image = render_image_preview(modules.globals.target_path, (200, 200))
+    target_label.configure(image=target_image)
 
 
 def select_target_path() -> None:
