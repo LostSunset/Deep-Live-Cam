@@ -95,6 +95,8 @@ def save_switch_states():
         "live_resizable": modules.globals.live_resizable,
         "fp_ui": modules.globals.fp_ui,
         "show_fps": modules.globals.show_fps,
+        "mouth_mask": modules.globals.mouth_mask
+        "show_mouth_mask_box": modules.globals.show_mouth_mask_box
     }
     with open("switch_states.json", "w") as f:
         json.dump(switch_states, f)
@@ -115,6 +117,8 @@ def load_switch_states():
         modules.globals.live_resizable = switch_states.get("live_resizable", False)
         modules.globals.fp_ui = switch_states.get("fp_ui", {"face_enhancer": False})
         modules.globals.show_fps = switch_states.get("show_fps", False)
+        modules.globals.mouth_mask = switch_states.get("mouth_mask", False)
+        modules.globals.show_mouth_mask_box = switch_states.get("show_mouth_mask_box", False)
     except FileNotFoundError:
         # If the file doesn't exist, use default values
         pass
@@ -268,6 +272,28 @@ def create_root(start: Callable[[], None], destroy: Callable[[], None]) -> ctk.C
         ),
     )
     show_fps_switch.place(relx=0.6, rely=0.75)
+
+    mouth_mask_var = ctk.BooleanVar(value=modules.globals.mouth_mask)
+    mouth_mask_switch = ctk.CTkSwitch(
+        root,
+        text="Mouth Mask",
+        variable=mouth_mask_var,
+        cursor="hand2",
+        command=lambda: setattr(modules.globals, "mouth_mask", mouth_mask_var.get()),
+    )
+    mouth_mask_switch.place(relx=0.1, rely=0.55)
+
+    show_mouth_mask_box_var = ctk.BooleanVar(value=modules.globals.show_mouth_mask_box)
+    show_mouth_mask_box_switch = ctk.CTkSwitch(
+        root,
+        text="Show Mouth Mask Box",
+        variable=show_mouth_mask_box_var,
+        cursor="hand2",
+        command=lambda: setattr(
+            modules.globals, "show_mouth_mask_box", show_mouth_mask_box_var.get()
+        ),
+    )
+    show_mouth_mask_box_switch.place(relx=0.6, rely=0.55)
 
     start_button = ctk.CTkButton(
         root, text="Start", cursor="hand2", command=lambda: analyze_target(start, root)
