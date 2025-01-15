@@ -2,7 +2,7 @@ name: Backup Fork and Sync
 
 on:
   schedule:
-    - cron: '0 0 * * 0'  # 每週日午夜執行
+    - cron: '0 0 * * 1'  # 每週日午夜執行
   workflow_dispatch:  # 允許手動觸發
 
 env:
@@ -38,19 +38,45 @@ jobs:
           git remote add upstream ${{ env.UPSTREAM_REPO }} || git remote set-url upstream ${{ env.UPSTREAM_REPO }}
           git fetch --all --tags
 
+      # 同步上游的標籤
+      - name: Sync tags from upstream
+        run: |
+          echo "Syncing tags from upstream..."
+          # 保存同步狀態標籤
+          SYNC_TAGS=$(git tag -l "pre-sync-*" "post-sync-*")
+          # 刪除非同步狀態的標籤
+          git tag -l | grep -v "^pre-sync-\|^post-sync-" | xargs -r git tag -d
+          # 獲取上游標籤
+          git fetch upstream --tags
+          # 重新添加同步狀態標籤（如果有）
+          if [ ! -z "$SYNC_TAGS" ]; then
+            echo "$SYNC_TAGS" | while read tag; do
+              git tag -f "$tag" $(git rev-list -n 1 "$tag")
+            done
+          fi
+          # 推送所有標籤
+          git push origin --tags --force
+
       - name: Sync and handle conflicts
         run: |
           branches=$(git branch -r | grep 'origin/' | grep -v 'origin/HEAD' | sed 's/origin\///')
-          
+
           for branch in $branches; do
             echo "Processing branch: $branch"
-            
+
             if git ls-remote --exit-code --heads upstream $branch > /dev/null 2>&1; then
-              git checkout -B $branch origin/$branch
+              # Force reset the branch to its remote state
+              git checkout -B $branch origin/$branch --force
               
+              # Forcefully remove untracked files and directories
+              git clean -fdx
+              
+              # Reset any changes in tracked files
+              git reset --hard origin/$branch
+
               echo "Changes in upstream $branch:"
               git log --oneline $branch..upstream/$branch
-              
+
               if git merge upstream/$branch --no-edit --allow-unrelated-histories; then
                 echo "Successfully merged changes for $branch"
               else
@@ -80,6 +106,13 @@ jobs:
         run: |
           echo "Sync Report" > sync_report.md
           echo "===========" >> sync_report.md
+          echo "" >> sync_report.md
+          echo "## Tags Sync Status" >> sync_report.md
+          echo "Upstream tags:" >> sync_report.md
+          git ls-remote --tags upstream | awk '{print $2}' | sed 's/refs\/tags\///' >> sync_report.md
+          echo "" >> sync_report.md
+          echo "Local tags:" >> sync_report.md
+          git tag -l >> sync_report.md
           echo "" >> sync_report.md
           git branch -r | grep 'origin/' | grep -v 'origin/HEAD' | sed 's/origin\///' | while read branch; do
             echo "## Branch: $branch" >> sync_report.md
