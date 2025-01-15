@@ -2,7 +2,7 @@ name: Backup Fork and Sync
 
 on:
   schedule:
-    - cron: '0 0 * * 1'  # 每週日午夜執行
+    - cron: '0 0 * * 2'  # 每週日午夜執行
   workflow_dispatch:  # 允許手動觸發
 
 env:
@@ -44,20 +44,47 @@ jobs:
       - name: Sync tags from upstream
         run: |
           echo "Syncing tags from upstream..."
+          
+          # 獲取所有遠程標籤資訊
+          git fetch upstream --tags
+          
+          # 列出所有上游標籤
+          UPSTREAM_TAGS=$(git ls-remote --tags upstream | grep -v '{}' | cut -f2 | sed 's/refs\/tags\///')
+          
           # 保存同步狀態標籤
           SYNC_TAGS=$(git tag -l "pre-sync-*" "post-sync-*")
-          # 刪除非同步狀態的標籤
+          
+          # 刪除本地非同步狀態的標籤
           git tag -l | grep -v "^pre-sync-\|^post-sync-" | xargs -r git tag -d
-          # 獲取上游標籤
-          git fetch upstream --tags
+          
+          # 創建上游標籤
+          echo "$UPSTREAM_TAGS" | while read -r tag; do
+            if [ ! -z "$tag" ]; then
+              echo "Processing tag: $tag"
+              # 獲取標籤的完整資訊（包含註釋）
+              if git rev-parse "refs/tags/$tag" >/dev/null 2>&1; then
+                # 如果是註釋標籤，保留註釋
+                GIT_TAG_MSG=$(git tag -l --format='%(contents)' "$tag")
+                git tag -f -a "$tag" -m "$GIT_TAG_MSG" "$(git rev-list -n 1 "refs/tags/$tag" 2>/dev/null)"
+              else
+                # 如果是輕量標籤或新標籤
+                git tag -f "$tag" "$(git rev-list -n 1 "upstream/refs/tags/$tag" 2>/dev/null)"
+              fi
+            fi
+          done
+          
           # 重新添加同步狀態標籤（如果有）
           if [ ! -z "$SYNC_TAGS" ]; then
             echo "$SYNC_TAGS" | while read tag; do
-              git tag -f "$tag" $(git rev-list -n 1 "$tag")
+              if [ ! -z "$tag" ]; then
+                git tag -f "$tag" $(git rev-list -n 1 "$tag")
+              fi
             done
           fi
-          # 推送所有標籤
+          
+          # 推送所有標籤到遠端，包括刪除不存在的標籤
           git push origin --tags --force
+          git push origin --prune origin "+refs/tags/*:refs/tags/*"
 
       - name: Sync and handle conflicts
         run: |
