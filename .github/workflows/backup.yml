@@ -48,28 +48,19 @@ jobs:
           # 獲取所有遠程標籤資訊
           git fetch upstream --tags
           
-          # 列出所有上游標籤
-          UPSTREAM_TAGS=$(git ls-remote --tags upstream | grep -v '{}' | cut -f2 | sed 's/refs\/tags\///')
-          
           # 保存同步狀態標籤
           SYNC_TAGS=$(git tag -l "pre-sync-*" "post-sync-*")
           
           # 刪除本地非同步狀態的標籤
           git tag -l | grep -v "^pre-sync-\|^post-sync-" | xargs -r git tag -d
           
-          # 創建上游標籤
-          echo "$UPSTREAM_TAGS" | while read -r tag; do
+          # 獲取並創建上游標籤
+          git ls-remote --tags upstream | grep -v '{}' | while read -r sha ref; do
+            tag=${ref#refs/tags/}
             if [ ! -z "$tag" ]; then
               echo "Processing tag: $tag"
-              # 獲取標籤的完整資訊（包含註釋）
-              if git rev-parse "refs/tags/$tag" >/dev/null 2>&1; then
-                # 如果是註釋標籤，保留註釋
-                GIT_TAG_MSG=$(git tag -l --format='%(contents)' "$tag")
-                git tag -f -a "$tag" -m "$GIT_TAG_MSG" "$(git rev-list -n 1 "refs/tags/$tag" 2>/dev/null)"
-              else
-                # 如果是輕量標籤或新標籤
-                git tag -f "$tag" "$(git rev-list -n 1 "upstream/refs/tags/$tag" 2>/dev/null)"
-              fi
+              # 直接使用上游的 SHA
+              git tag -f "$tag" "$sha"
             fi
           done
           
@@ -82,9 +73,10 @@ jobs:
             done
           fi
           
-          # 推送所有標籤到遠端，包括刪除不存在的標籤
+          # 推送所有標籤到遠端
           git push origin --tags --force
-          git push origin --prune origin "+refs/tags/*:refs/tags/*"
+          # 清理已刪除的標籤
+          git fetch --prune origin "+refs/tags/*:refs/tags/*"
 
       - name: Sync and handle conflicts
         run: |
