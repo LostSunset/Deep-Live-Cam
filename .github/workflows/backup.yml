@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      GH_TOKEN: ${{ secrets.PAT_TOKEN }}
 
     steps:
       - name: Checkout repository
@@ -125,6 +127,81 @@ jobs:
             fi
             echo "" >> sync_report.md
           done
+
+      # 同步 Releases
+      - name: Install GitHub CLI
+        run: |
+          type -p curl >/dev/null || sudo apt install curl -y
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && sudo apt update \
+          && sudo apt install gh -y
+
+      - name: Sync Releases
+        run: |
+          # 解析上游倉庫資訊
+          UPSTREAM_OWNER=$(echo "${{ env.UPSTREAM_REPO }}" | sed -E 's/.*github.com\/([^\/]+)\/([^\/]+)(\.git)?$/\1/')
+          UPSTREAM_REPO=$(echo "${{ env.UPSTREAM_REPO }}" | sed -E 's/.*github.com\/([^\/]+)\/([^\/]+)(\.git)?$/\2/')
+          CURRENT_REPO="${GITHUB_REPOSITORY#*/}"
+          
+          echo "Syncing releases from ${UPSTREAM_OWNER}/${UPSTREAM_REPO} to ${CURRENT_REPO}..."
+          
+          # 獲取上游的所有 releases
+          releases=$(gh api repos/${UPSTREAM_OWNER}/${UPSTREAM_REPO}/releases --paginate)
+          
+          # 遍歷每個 release
+          echo "$releases" | jq -c '.[]' | while read -r release; do
+            tag_name=$(echo "$release" | jq -r '.tag_name')
+            name=$(echo "$release" | jq -r '.name')
+            body=$(echo "$release" | jq -r '.body')
+            draft=$(echo "$release" | jq -r '.draft')
+            prerelease=$(echo "$release" | jq -r '.prerelease')
+            
+            echo "Processing release: $tag_name"
+            
+            # 檢查 release 是否已存在
+            if ! gh release view "$tag_name" &>/dev/null; then
+              echo "Creating release $tag_name..."
+              
+              # 創建 release
+              create_args=()
+              [ "$draft" = "true" ] && create_args+=(--draft)
+              [ "$prerelease" = "true" ] && create_args+=(--prerelease)
+              
+              gh release create "$tag_name" "${create_args[@]}" \
+                --title "$name" \
+                --notes "$body" || echo "Failed to create release $tag_name"
+              
+              # 如果有資源文件，下載並上傳
+              assets=$(echo "$release" | jq -r '.assets[].browser_download_url')
+              if [ ! -z "$assets" ]; then
+                temp_dir=$(mktemp -d)
+                echo "$assets" | while read -r asset_url; do
+                  asset_name=$(basename "$asset_url")
+                  echo "Downloading asset: $asset_name"
+                  curl -L -o "$temp_dir/$asset_name" "$asset_url"
+                  echo "Uploading asset: $asset_name"
+                  gh release upload "$tag_name" "$temp_dir/$asset_name" --clobber || echo "Failed to upload asset $asset_name"
+                done
+                rm -rf "$temp_dir"
+              fi
+            else
+              echo "Release $tag_name already exists, skipping..."
+            fi
+          done
+          
+          echo "Done syncing releases"
+          
+      - name: Update Sync Report with Releases Status
+        run: |
+          echo "## Releases Sync Status" >> sync_report.md
+          echo "Upstream releases:" >> sync_report.md
+          gh release list --repo ${{ env.UPSTREAM_REPO }} >> sync_report.md
+          echo "" >> sync_report.md
+          echo "Local releases:" >> sync_report.md
+          gh release list >> sync_report.md
+          echo "" >> sync_report.md
 
       - name: Upload sync report
         if: always()
