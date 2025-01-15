@@ -141,11 +141,24 @@ jobs:
       - name: Sync Releases
         run: |
           # 解析上游倉庫資訊
-          UPSTREAM_OWNER=$(echo "${{ env.UPSTREAM_REPO }}" | sed -E 's/.*github.com\/([^\/]+)\/([^\/]+)(\.git)?$/\1/')
-          UPSTREAM_REPO=$(echo "${{ env.UPSTREAM_REPO }}" | sed -E 's/.*github.com\/([^\/]+)\/([^\/]+)(\.git)?$/\2/')
+          UPSTREAM_URL="${{ env.UPSTREAM_REPO }}"
+          # 移除 .git 結尾（如果存在）
+          UPSTREAM_URL=${UPSTREAM_URL%.git}
+          # 移除 https://github.com/ 前綴（如果存在）
+          UPSTREAM_URL=${UPSTREAM_URL#https://github.com/}
+          # 分割所有者和倉庫名
+          UPSTREAM_OWNER=$(echo "$UPSTREAM_URL" | cut -d'/' -f1)
+          UPSTREAM_REPO=$(echo "$UPSTREAM_URL" | cut -d'/' -f2)
           CURRENT_REPO="${GITHUB_REPOSITORY#*/}"
           
           echo "Syncing releases from ${UPSTREAM_OWNER}/${UPSTREAM_REPO} to ${CURRENT_REPO}..."
+          
+          # 檢查倉庫是否可訪問
+          if ! gh repo view "${UPSTREAM_OWNER}/${UPSTREAM_REPO}" &>/dev/null; then
+            echo "Error: Cannot access repository ${UPSTREAM_OWNER}/${UPSTREAM_REPO}"
+            echo "Please check if the repository exists and is accessible"
+            exit 1
+          fi
           
           # 獲取上游的所有 releases
           releases=$(gh api repos/${UPSTREAM_OWNER}/${UPSTREAM_REPO}/releases --paginate)
