@@ -12,7 +12,15 @@
   <img src="media/demo.gif" alt="Demo GIF" width="800">
 </p>
 
+##  Disclaimer
+
+###### This software is intended as a productive contribution to the AI-generated media industry. It aims to assist artists with tasks like animating custom characters or using them as models for clothing, etc.
+
+###### We are aware of the potential for unethical applications and are committed to preventative measures. A built-in check prevents the program from processing inappropriate media (nudity, graphic content, sensitive material like war footage, etc.). We will continue to develop this project responsibly, adhering to the law and ethics. We may shut down the project or add watermarks if legally required.
+
+###### Users are expected to use this software responsibly and legally. If using a real person's face, obtain their consent and clearly label any output as a deepfake when sharing online. We are not responsible for end-user actions.
 ## Quick Start - Pre-built (Windows / Nvidia)
+
   <a href="https://hacksider.gumroad.com/l/vccdmm"> <img src="https://github.com/user-attachments/assets/7d993b32-e3e8-4cd3-bbfb-a549152ebdd5" width="285" height="77" />
 
 ##### This is the fastest build you can get if you have a discrete NVIDIA GPU.
@@ -33,33 +41,46 @@
 
 ### Mouth Mask
 
-**Retain your original mouth using Mouth Mask**
+**Retain your original mouth for accurate movement using Mouth Mask**
 
-![resizable-gif](media/ludwig.gif)
+<p align="center">
+  <img src="media/ludwig.gif" alt="resizable-gif">
+</p>
 
 ### Face Mapping
 
-**Use different faces on multiple subjects**
+**Use different faces on multiple subjects simultaneously**
 
-![face\_mapping\_source](media/streamers.gif)
+<p align="center">
+  <img src="media/streamers.gif" alt="face_mapping_source">
+</p>
 
 ### Your Movie, Your Face
 
 **Watch movies with any face in real-time**
 
-![movie](media/movie.gif)
+<p align="center">
+  <img src="media/movie.gif" alt="movie">
+</p>
 
 ### Live Show
 
-**Run Live shows and performances using Deep-Live-Cam**
+**Run Live shows and performances**
 
-![show](media/live_show.gif)
+<p align="center">
+  <img src="media/live_show.gif" alt="show">
+</p>
 
-## Benchmarks
+### Memes
 
-**Nearly 0% detection!**
+**Create Your most viral meme yet**
 
-![bench](media/deepwarebench.gif)
+<p align="center">
+  <img src="media/meme.gif" alt="show" width="450"> 
+  <br>
+  <sub>Created using Many Faces feature in Deep-Live-Cam</sub>
+</p>
+
 
 ## Installation (Manual)
 
@@ -222,7 +243,6 @@ options:
   --many-faces                                             process every face
   --map-faces                                              map source target faces
   --mouth-mask                                             mask the mouth region
-  --nsfw-filter                                            filter the NSFW image or video
   --video-encoder {libx264,libx265,libvpx-vp9}             adjust output video encoder
   --video-quality [0-51]                                   adjust output video quality
   --live-mirror                                            the live camera display as you see it in the front-facing camera frame
@@ -282,15 +302,4 @@ Looking for a CLI mode? Using the -s/--source argument will make the run program
  </picture>
 </a>
 
-## Contact
 
-[hacksider](https://github.com/hacksider) - ```hacksider[at]deeplivecam.net```
-
-[KRSHH](https://github.com/KRSHH) - ```krshh[at]deeplivecam.net```
-
-##  Disclaimer
-###### This software is intended as a productive contribution to the AI-generated media industry. It aims to assist artists with tasks like animating custom characters or using them as models for clothing, etc.
-
-###### We are aware of the potential for unethical applications and are committed to preventative measures. A built-in check prevents the program from processing inappropriate media (nudity, graphic content, sensitive material like war footage, etc.). We will continue to develop this project responsibly, adhering to the law and ethics. We may shut down the project or add watermarks if legally required.
-
-###### Users are expected to use this software responsibly and legally. If using a real person's face, obtain their consent and clearly label any output as a deepfake when sharing online. We are not responsible for end-user actions.
