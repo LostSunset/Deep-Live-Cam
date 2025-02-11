@@ -49,7 +49,7 @@ Users are expected to use this software responsibly and legally. If using a real
 2. Select which camera to use
 3. Press live!
 
-## Features & Uses - Everything is real-time
+## Features & Uses - Everything is in real-time
 
 ### Mouth Mask
 
@@ -85,7 +85,7 @@ Users are expected to use this software responsibly and legally. If using a real
 
 ### Memes
 
-**Create Your most viral meme yet**
+**Create Your Most Viral Meme Yet**
 
 <p align="center">
   <img src="media/meme.gif" alt="show" width="450"> 
@@ -93,6 +93,13 @@ Users are expected to use this software responsibly and legally. If using a real
   <sub>Created using Many Faces feature in Deep-Live-Cam</sub>
 </p>
 
+### Omegle
+
+**Surprise people on Omegle**
+
+<p align="center">
+  <video src="https://github.com/user-attachments/assets/2e9b9b82-fa04-4b70-9f56-b1f68e7672d0" width="450" controls></video>
+</p>
 
 ## Installation (Manual)
 
