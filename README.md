@@ -36,12 +36,8 @@ Users are expected to use this software responsibly and legally. If using a real
   <a href="https://hacksider.gumroad.com/l/vccdmm"> <img src="https://github.com/user-attachments/assets/7d993b32-e3e8-4cd3-bbfb-a549152ebdd5" width="285" height="77" />
 
 ##### This is the fastest build you can get if you have a discrete NVIDIA GPU.
-
-## Quick Start - Pre-built (Mac / Silicon)
-    
-  <a href="https://krshh.gumroad.com/l/Deep-Live-Cam-Mac"> <img src="https://github.com/user-attachments/assets/d5d913b5-a7de-4609-96b9-979a5749a703" width="285" height="77" />
  
-###### These Pre-builts are perfect for non-technical users or those who don’t have time to, or can't manually install all the requirements. Just a heads-up: this is an open-source project, so you can also install it manually.
+###### These Pre-builts are perfect for non-technical users or those who don't have time to, or can't manually install all the requirements. Just a heads-up: this is an open-source project, so you can also install it manually.
 
 ## TLDR; Live Deepfake in just 3 Clicks
 ![easysteps](https://github.com/user-attachments/assets/af825228-852c-411b-b787-ffd9aac72fc6)
@@ -123,7 +119,8 @@ This is more likely to work on your computer but will be slower as it utilizes t
 **2. Clone the Repository**
 
 ```bash
-https://github.com/hacksider/Deep-Live-Cam.git
+git clone https://github.com/hacksider/Deep-Live-Cam.git
+cd Deep-Live-Cam
 ```
 
 **3. Download the Models**
@@ -137,14 +134,44 @@ Place these files in the "**models**" folder.
 
 We highly recommend using a `venv` to avoid issues.
 
+For Windows:
 ```bash
+python -m venv venv
+venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-**For macOS:** Install or upgrade the `python-tk` package:
+**For macOS:**
+
+Apple Silicon (M1/M2/M3) requires specific setup:
 
 ```bash
+# Install Python 3.10 (specific version is important)
+brew install python@3.10
+
+# Install tkinter package (required for the GUI)
 brew install python-tk@3.10
+
+# Create and activate virtual environment with Python 3.10
+python3.10 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+** In case something goes wrong and you need to reinstall the virtual environment **
+
+```bash
+# Deactivate the virtual environment
+rm -rf venv
+
+# Reinstall the virtual environment
+python -m venv venv
+source venv/bin/activate
+
+# install the dependencies again
+pip install -r requirements.txt
 ```
 
 **Run:** If you don't have a GPU, you can run Deep-Live-Cam using `python run.py`. Note that initial execution will download models (~300MB).
@@ -169,18 +196,38 @@ python run.py --execution-provider cuda
 
 **CoreML Execution Provider (Apple Silicon)**
 
-1. Install dependencies:
+Apple Silicon (M1/M2/M3) specific installation:
+
+1. Make sure you've completed the macOS setup above using Python 3.10.
+2. Install dependencies:
 
 ```bash
 pip uninstall onnxruntime onnxruntime-silicon
 pip install onnxruntime-silicon==1.13.1
 ```
 
-2. Usage:
+3. Usage (important: specify Python 3.10):
 
 ```bash
-python run.py --execution-provider coreml
+python3.10 run.py --execution-provider coreml
 ```
+
+**Important Notes for macOS:**
+- You **must** use Python 3.10, not newer versions like 3.11 or 3.13
+- Always run with `python3.10` command not just `python` if you have multiple Python versions installed
+- If you get error about `_tkinter` missing, reinstall the tkinter package: `brew reinstall python-tk@3.10`
+- If you get model loading errors, check that your models are in the correct folder
+- If you encounter conflicts with other Python versions, consider uninstalling them:
+  ```bash
+  # List all installed Python versions
+  brew list | grep python
+  
+  # Uninstall conflicting versions if needed
+  brew uninstall --ignore-dependencies python@3.11 python@3.13
+  
+  # Keep only Python 3.10
+  brew cleanup
+  ```
 
 **CoreML Execution Provider (Apple Legacy)**
 
@@ -226,7 +273,6 @@ pip install onnxruntime-openvino==1.15.0
 ```bash
 python run.py --execution-provider openvino
 ```
-
 </details>
 
 ## Usage
@@ -246,6 +292,19 @@ python run.py --execution-provider openvino
 -   Wait for the preview to appear (10-30 seconds).
 -   Use a screen capture tool like OBS to stream.
 -   To change the face, select a new source image.
+
+## Tips and Tricks
+
+Check out these helpful guides to get the most out of Deep-Live-Cam:
+
+- [Unlocking the Secrets to the Perfect Deepfake Image](https://deeplivecam.net/index.php/blog/tips-and-tricks/unlocking-the-secrets-to-the-perfect-deepfake-image) - Learn how to create the best deepfake with full head coverage
+- [Video Call with DeepLiveCam](https://deeplivecam.net/index.php/blog/tips-and-tricks/video-call-with-deeplivecam) - Make your meetings livelier by using DeepLiveCam with OBS and meeting software
+- [Have a Special Guest!](https://deeplivecam.net/index.php/blog/tips-and-tricks/have-a-special-guest) - Tutorial on how to use face mapping to add special guests to your stream
+- [Watch Deepfake Movies in Realtime](https://deeplivecam.net/index.php/blog/tips-and-tricks/watch-deepfake-movies-in-realtime) - See yourself star in any video without processing the video
+- [Better Quality without Sacrificing Speed](https://deeplivecam.net/index.php/blog/tips-and-tricks/better-quality-without-sacrificing-speed) - Tips for achieving better results without impacting performance
+- [Instant Vtuber!](https://deeplivecam.net/index.php/blog/tips-and-tricks/instant-vtuber) - Create a new persona/vtuber easily using Metahuman Creator
+
+Visit our [official blog](https://deeplivecam.net/index.php/blog/tips-and-tricks) for more tips and tutorials.
 
 ## Command Line Arguments (Unmaintained)
 
@@ -320,5 +379,3 @@ Looking for a CLI mode? Using the -s/--source argument will make the run program
    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=hacksider/deep-live-cam&type=Date" />
  </picture>
 </a>
-
-
